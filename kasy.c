@@ -4,8 +4,8 @@
 #include <alsa/asoundlib.h>
 #include <argp.h>
 #include <signal.h>
-#include <stdio.h>
 #include <stdbool.h>
+#include <stdio.h>
 
 static snd_seq_t *seq;
 static snd_seq_addr_t *port;
@@ -71,9 +71,10 @@ static void process_event(const snd_seq_event_t *ev, Display *display) {
 }
 
 const char *argp_program_version = "0.0.1";
-static struct argp_option options[] = {{"port", 'p', "PORT", 0, "Port number (REQUIRED)", 0},
-                                       {0, 'd', 0, 0, "Daemonize", 0},
-                                       {0}};
+static struct argp_option options[] = {
+    {"port", 'p', "PORT", 0, "Port number (REQUIRED)", 0},
+    {0, 'd', 0, 0, "Daemonize", 0},
+    {0}};
 
 static char doc[] = "Use your synthesizer as keyboard";
 /* static char args_doc[] = "MAPPING"; */
@@ -102,7 +103,8 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
     break;
   case ARGP_KEY_END:
     if (arguments->port_name == NULL) {
-      argp_failure(state, 1, 0, "required -p option. See --help for more information");
+      argp_failure(state, 1, 0,
+                   "required -p option. See --help for more information");
       exit(ARGP_ERR_UNKNOWN);
     };
     break;
@@ -115,7 +117,7 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
 static struct argp argp = {options, parse_opt, 0, doc, 0, 0, 0};
 
 int main(int argc, char *argv[]) {
-  struct arguments arguments = { 0 };
+  struct arguments arguments = {0};
   if (argp_parse(&argp, argc, argv, 0, 0, &arguments) != 0) {
     perror("Arguments parsing error");
   };
