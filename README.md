@@ -13,4 +13,4 @@ After you checked all dependencies `cd` to project directory and run:
 $ make
 ```
 
-to build the program, then just execute `./kasy --help` to see the help.
+to build the program, then just execute `./build/kasy --help` to see the help.
