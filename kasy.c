@@ -6,6 +6,7 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <unistd.h>
 
 static snd_seq_t *seq;
 static snd_seq_addr_t *port;
@@ -91,14 +92,11 @@ static error_t parse_opt(int key, char *arg, struct argp_state *state) {
   switch (key) {
   case 'p':
     arguments->port_name = arg;
-    err = snd_seq_parse_address(seq, port, arguments->port_name);
-    fprintf(stderr, "Parse port [%s]: %s\n", arg, snd_strerror(err));
     if (err < 0) {
       argp_usage(state);
     }
     break;
   case 'd':
-    fprintf(stderr, "Daemonizing...\n");
     arguments->daemon = true;
     break;
   case ARGP_KEY_END:
@@ -122,10 +120,23 @@ int main(int argc, char *argv[]) {
     perror("Arguments parsing error");
   };
 
+  int nochdir = 1;
+  int noclose = 1;
+
+  if (arguments.daemon) {
+    fprintf(stderr, "Daemonizing...\n");
+    if (daemon(nochdir, noclose)) {
+      perror("daemon");
+    }
+  };
+
   int err;
   err = snd_seq_open(&seq, "default", SND_SEQ_OPEN_DUPLEX, SND_SEQ_NONBLOCK);
   fprintf(stderr, "Open sequencer: %s\n", snd_strerror(err));
   port = realloc(port, sizeof(snd_seq_addr_t));
+
+  err = snd_seq_parse_address(seq, port, arguments.port_name);
+  fprintf(stderr, "Parse port [%s]: %s\n", arguments.port_name, snd_strerror(err));
 
   err = snd_seq_create_simple_port(
       seq, "aseqdump", SND_SEQ_PORT_CAP_WRITE | SND_SEQ_PORT_CAP_SUBS_WRITE,

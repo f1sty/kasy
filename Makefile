@@ -1,5 +1,5 @@
 CC=clang
-CFLAGS=$(shell pkgconf --cflags x11 alsa) -Wall -pedantic -Wextra
+CFLAGS=$(shell pkgconf --cflags x11 alsa) -Wall -pedantic -Wextra -ggdb
 LDFLAGS=$(shell pkgconf --libs x11 alsa)
 
 TARGET=kasy
