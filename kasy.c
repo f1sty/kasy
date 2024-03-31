@@ -18,7 +18,7 @@ static void sighandler(int sig ATTRIBUTE_UNUSED) { stop = 1; }
 
 Status send_event(Display *display, XEvent *key_event) {
   Status status =
-      XSendEvent(display, InputFocus, False, KeyPressMask, key_event);
+      XSendEvent(display, InputFocus, True, KeyPressMask, key_event);
   if (status == 0) {
     fprintf(stderr, "Error: conversion to wire protocol format failed\n");
   } else if (status == BadValue) {
@@ -29,6 +29,7 @@ Status send_event(Display *display, XEvent *key_event) {
                     "defined Window\n");
   }
 
+  XFlush(display);
   return status;
 }
 
@@ -43,6 +44,8 @@ static void process_event(const snd_seq_event_t *ev, Display *display) {
     XKeyPressedEvent key_event = {.type = KeyPress,
                                   .send_event = True,
                                   .display = display,
+                                  .subwindow = None,
+                                  .time = CurrentTime,
                                   /* .window = screen->root, */
                                   /* .root = screen->root, */
                                   .same_screen = True,
@@ -60,6 +63,8 @@ static void process_event(const snd_seq_event_t *ev, Display *display) {
     XKeyPressedEvent key_event = {.type = KeyRelease,
                                   .send_event = True,
                                   .display = display,
+                                  .subwindow = None,
+                                  .time = CurrentTime,
                                   /* .window = screen->root, */
                                   /* .root = screen->root, */
                                   .same_screen = True,
@@ -87,14 +92,10 @@ struct arguments {
 
 static error_t parse_opt(int key, char *arg, struct argp_state *state) {
   struct arguments *arguments = state->input;
-  int err;
 
   switch (key) {
   case 'p':
     arguments->port_name = arg;
-    if (err < 0) {
-      argp_usage(state);
-    }
     break;
   case 'd':
     arguments->daemon = true;
